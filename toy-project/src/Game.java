@@ -16,8 +16,11 @@ public class Game extends Thread {
     private int playerSpeed = 10;
     private int playerHp = 30;
 
+    private boolean thisStage; // 
     private boolean up, down, left, right, shooting;
     private boolean isOver;
+    private boolean nextStage = false; //
+    private boolean gameOver = false; //
 
     private ArrayList<PlayerAttack> playerAttackList = new ArrayList<PlayerAttack>();
     private ArrayList<Enemy> enemyList = new ArrayList<Enemy>();
@@ -33,19 +36,7 @@ public class Game extends Thread {
     // 생성자에서 이미지 로드 및 크기 조정
     public Game() {
         String imagePath = "src/images/pinku_fly01.png";
-        ImageIcon icon = new ImageIcon(imagePath);
-        Image originalPlayerImage = icon.getImage();
-
-        // 원래 크기에서 %로 줄이기
-        int originalWidth = originalPlayerImage.getWidth(null);
-        int originalHeight = originalPlayerImage.getHeight(null);
-        playerWidth = originalWidth / 4;
-        playerHeight = originalHeight / 4;
-        player = originalPlayerImage.getScaledInstance(playerWidth, playerHeight, Image.SCALE_SMOOTH);
-        
-        if (player == null) {
-            System.out.println("Failed to load image: " + imagePath);
-        }
+        setPlayer(new ImageIcon(imagePath).getImage());
     }
 
     @Override
@@ -81,6 +72,7 @@ public class Game extends Thread {
 
     public void reset() {
         isOver = false;
+        gameOver = false;
         cnt = 0;
         score = 0;
         playerX = 10;
@@ -153,7 +145,10 @@ public class Game extends Thread {
                 hitSound.start();
                 playerHp -= enemyAttack.attack;
                 enemyAttackList.remove(enemyAttack);
-                if (playerHp <= 0) isOver = true;
+                if (playerHp <= 0) {
+                	isOver = true; 
+                	gameOver = true; //
+                }
             }
         }
     }
@@ -201,14 +196,37 @@ public class Game extends Thread {
     //
     public void setPlayer(Image player) {
     	this.player = player;
+    	
+    	int originalWidth = player.getWidth(null);
+    	int originalHeight = player.getHeight(null);
+    	playerWidth = originalWidth/3;
+    	playerHeight = originalHeight/3;
+    	this.player=player.getScaledInstance(playerWidth, playerHeight, Image.SCALE_SMOOTH);
+    	
     }
     //
     public Image getPlayer() {
     	return this.player;
     }
     
+    public boolean getThisStage() {
+		return this.thisStage;
+		
+	}
+    
+    //
+    public boolean nextStage() {
+        return nextStage;
+    }
+    
+    //
     public boolean isOver() {
         return isOver;
+    }
+    
+    //
+    public boolean gameOver() {
+        return gameOver;
     }
 
     public void setUp(boolean up) {
