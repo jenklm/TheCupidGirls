@@ -8,11 +8,11 @@ public class Game extends Thread {
     private int cnt;
     private int score;
 
-    private Image player = new ImageIcon("src/images/player.png").getImage();
+    private Image player; //
 
     private int playerX, playerY;
-    private int playerWidth = player.getWidth(null);
-    private int playerHeight = player.getHeight(null);
+    private int playerWidth;
+    private int playerHeight;
     private int playerSpeed = 10;
     private int playerHp = 30;
 
@@ -29,6 +29,24 @@ public class Game extends Thread {
 
     private Audio backgroundMusic;
     private Audio hitSound;
+    
+    // 생성자에서 이미지 로드 및 크기 조정
+    public Game() {
+        String imagePath = "src/images/pinku_fly01.png";
+        ImageIcon icon = new ImageIcon(imagePath);
+        Image originalPlayerImage = icon.getImage();
+
+        // 원래 크기에서 %로 줄이기
+        int originalWidth = originalPlayerImage.getWidth(null);
+        int originalHeight = originalPlayerImage.getHeight(null);
+        playerWidth = originalWidth / 4;
+        playerHeight = originalHeight / 4;
+        player = originalPlayerImage.getScaledInstance(playerWidth, playerHeight, Image.SCALE_SMOOTH);
+        
+        if (player == null) {
+            System.out.println("Failed to load image: " + imagePath);
+        }
+    }
 
     @Override
     public void run() {
@@ -67,6 +85,7 @@ public class Game extends Thread {
         score = 0;
         playerX = 10;
         playerY = (Main.SCREEN_HEIGHT - playerHeight) / 2;
+        playerHp = 30; // restart 했을 때, playerHP 바 안보이는 버그 해결..
 
         backgroundMusic.start();
 
@@ -81,7 +100,7 @@ public class Game extends Thread {
         if (left && playerX - playerSpeed > 0) playerX -= playerSpeed;
         if (right && playerX + playerWidth + playerSpeed < Main.SCREEN_WIDTH) playerX += playerSpeed;
         if (shooting && cnt % 15 == 0) {
-            playerAttack = new PlayerAttack(playerX + 222, playerY + 25);
+            playerAttack = new PlayerAttack(playerX + 150, playerY + 40); // 공격 나가는 위치 바꾸기..
             playerAttackList.add(playerAttack);
         }
     }
@@ -179,6 +198,15 @@ public class Game extends Thread {
         }
     }
 
+    //
+    public void setPlayer(Image player) {
+    	this.player = player;
+    }
+    //
+    public Image getPlayer() {
+    	return this.player;
+    }
+    
     public boolean isOver() {
         return isOver;
     }
@@ -202,4 +230,6 @@ public class Game extends Thread {
     public void setShooting(boolean shooting) {
         this.shooting = shooting;
     }
+    
+
 }
