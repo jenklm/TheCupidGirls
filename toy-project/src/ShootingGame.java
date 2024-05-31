@@ -168,8 +168,9 @@ public class ShootingGame extends JFrame {
                     break;
                 
                 case KeyEvent.VK_ESCAPE:
-                    System.exit(0);
+                    System.exit(0);  
                     break;
+              
             }
         }
 
