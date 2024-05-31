@@ -194,8 +194,8 @@ public class Game extends Thread {
     }
 
     //
-    public void setPlayer(Image player) {
-    	this.player = player;
+    public void setPlayer(Image playerImage) {
+    	this.player = playerImage;
     	
     	int originalWidth = player.getWidth(null);
     	int originalHeight = player.getHeight(null);
