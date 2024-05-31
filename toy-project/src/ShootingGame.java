@@ -13,18 +13,19 @@ public class ShootingGame extends JFrame {
 
     private Image mainScreen = new ImageIcon("src/images/main_screen.png").getImage();
     private Image selectcharScreen = new ImageIcon("src/images/selectchar_screen.png").getImage(); //
-    private Image loadingScreen = new ImageIcon("src/images/loading_screen.png").getImage();
+    private Image howtoplayscreen = new ImageIcon("src/images/howtoplay_screen.png").getImage();
     private Image gameScreen = new ImageIcon("src/images/game_screen.png").getImage();
     
     private Image character1 = new ImageIcon("src/images/pinku_fly01.png").getImage();
     private Image character2 = new ImageIcon("src/images/greeny_fly01.png").getImage();
     private Image character3 = new ImageIcon("src/images/bluecat_fly01.png").getImage();
 
-    private boolean isMainScreen, isSelectCharScreen, isLoadingScreen, isGameScreen; //
+    private boolean isMainScreen, isSelectCharScreen, isHowtoPlayScreen, isGameScreen; //
 
     private Game game = new Game();
 
     private Audio backgroundMusic;
+   
 
     public ShootingGame() {
         setTitle("TheCupidGirls");
@@ -42,7 +43,7 @@ public class ShootingGame extends JFrame {
     private void init() {
         isMainScreen = true;
         isSelectCharScreen = false; // 
-        isLoadingScreen = false;
+        isHowtoPlayScreen = false;
         isGameScreen = false;
         
 
@@ -53,13 +54,15 @@ public class ShootingGame extends JFrame {
         addMouseListener(new MouseListener()); //
     }
     
+    
     //
     private void showLoadingScreen() {
         isMainScreen = false;
-        isLoadingScreen = true;
+        isHowtoPlayScreen = true;
     }
     
     //
+    
     private void gameStart() {
         isMainScreen = false;
         isSelectCharScreen = true; 
@@ -69,12 +72,12 @@ public class ShootingGame extends JFrame {
             @Override
             public void run() {
                 backgroundMusic.stop();
-                isLoadingScreen = false;
+                isHowtoPlayScreen = false;
                 isGameScreen = true;
                 game.start();
             }
         };
-        loadingTimer.schedule(loadingTask, 1200);
+        loadingTimer.schedule(loadingTask, 2400);
     }
 
     public void paint(Graphics g) {
@@ -92,8 +95,8 @@ public class ShootingGame extends JFrame {
         if (isSelectCharScreen) {
         	 g.drawImage(selectcharScreen, 0, 0, null);
         }
-        if (isLoadingScreen) {
-            g.drawImage(loadingScreen, 0, 0, null);
+        if (isHowtoPlayScreen) {
+            g.drawImage(howtoplayscreen, 0, 0, null);
         }
         if (isGameScreen) {
             g.drawImage(gameScreen, 0, 0, null);
@@ -177,11 +180,19 @@ public class ShootingGame extends JFrame {
                     game.setPlayer(character3);
                     gameStart();
                 }
-            } else if (isLoadingScreen) {
+            } else if (isHowtoPlayScreen) {
             	// 로딩 화면에서 클릭 시 메인 화면으로 돌아가도록 설정
-            	isLoadingScreen = false;
-            	isMainScreen = true;
+            	if (mouseX >= 62 && mouseX <= 97 && mouseY >= 64 && mouseY <= 99) {
+            		isHowtoPlayScreen = false;
+            		isMainScreen = true;
+            	}else if (mouseX >= 519 && mouseX <= 762 && mouseY >= 569 && mouseY <= 648) {
+            		isHowtoPlayScreen = false;
+            		isSelectCharScreen = true;
+            	}
+            	
             }
+
+        	
         }
     }
     
