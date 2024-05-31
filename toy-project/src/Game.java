@@ -9,12 +9,13 @@ public class Game extends Thread {
     private int score;
 
     private Image player; //
+    private Image playerheart;
 
     private int playerX, playerY;
     private int playerWidth;
     private int playerHeight;
     private int playerSpeed = 10;
-    private int playerHp = 30;
+    private int playerHp = 5;
 
     private boolean thisStage; // 
     private boolean up, down, left, right, shooting;
@@ -37,6 +38,12 @@ public class Game extends Thread {
     public Game() {
         String imagePath = "src/images/pinku_fly01.png";
         setPlayer(new ImageIcon(imagePath).getImage());
+        
+        String heartImagePath = "src/images/playerheart.png";
+        Image originalHeartImage = new ImageIcon(heartImagePath).getImage();
+        int heartWidth = originalHeartImage.getWidth(null) / 3;
+        int heartHeight = originalHeartImage.getHeight(null) / 3;
+        playerheart = originalHeartImage.getScaledInstance(heartWidth, heartHeight, Image.SCALE_SMOOTH);
     }
 
     @Override
@@ -77,7 +84,7 @@ public class Game extends Thread {
         score = 0;
         playerX = 10;
         playerY = (Main.SCREEN_HEIGHT - playerHeight) / 2;
-        playerHp = 30; // restart 했을 때, playerHP 바 안보이는 버그 해결..
+        playerHp = 5; // restart 했을 때, playerHP 바 안보이는 버그 해결..
 
         backgroundMusic.start();
 
@@ -143,7 +150,7 @@ public class Game extends Thread {
 
             if (enemyAttack.x > playerX & enemyAttack.x < playerX + playerWidth && enemyAttack.y > playerY && enemyAttack.y < playerY + playerHeight) {
                 hitSound.start();
-                playerHp -= enemyAttack.attack;
+                playerHp -= 1;
                 enemyAttackList.remove(enemyAttack);
                 if (playerHp <= 0) {
                 	isOver = true; 
@@ -172,8 +179,16 @@ public class Game extends Thread {
 
     public void playerDraw(Graphics g) {
         g.drawImage(player, playerX, playerY, null);
-        g.setColor(Color.GREEN);
-        g.fillRect(playerX - 1, playerY - 40, playerHp * 6, 20);
+        
+        // Draw hearts in the top left corner without gaps
+        int heartWidth = playerheart.getWidth(null);
+
+        for (int i = 0; i < playerHp; i++) {
+            int heartX = 10 + (i * heartWidth);
+            g.drawImage(playerheart, heartX, 10, null);
+        }
+
+        
         for (int i = 0; i < playerAttackList.size(); i++) {
             playerAttack = playerAttackList.get(i);
             g.drawImage(playerAttack.image, playerAttack.x, playerAttack.y, null);

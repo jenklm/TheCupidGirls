@@ -20,17 +20,18 @@ public class ShootingGame extends JFrame {
     private Image nicknameScreen = new ImageIcon("src/images/nickname_screen.png").getImage(); //
     private Image gamestartalertScreen = new ImageIcon("src/images/gamestartalert_screen.png").getImage(); //
 
-    private Image gameScreen = new ImageIcon("src/images/game_screen.png").getImage();
+    private Image game02Screen = new ImageIcon("src/images/game02_screen.png").getImage();
     
     private Image character01 = new ImageIcon("src/images/pinku_fly01.png").getImage();
     private Image character02 = new ImageIcon("src/images/greeny_fly01.png").getImage();
     private Image character03 = new ImageIcon("src/images/bluecat_fly01.png").getImage();
     private Image selectedCharacterImage;
     
-    private boolean isMainScreen, isSelectCharScreen, isSelectChar01Screen, isSelectChar02Screen, isSelectChar03Screen, isNicknameScreen, isGameStartAlertScreen, isHowtoPlayScreen, isGameScreen; //
+    private boolean isMainScreen, isSelectCharScreen, isSelectChar01Screen, isSelectChar02Screen, isSelectChar03Screen, isNicknameScreen, isGameStartAlertScreen, isHowtoPlayScreen, isGame02Screen; //
 
     private Game game = new Game();
 
+    
     private Audio backgroundMusic;
    
 
@@ -56,7 +57,7 @@ public class ShootingGame extends JFrame {
         isNicknameScreen = false;
         isGameStartAlertScreen = false;
         isHowtoPlayScreen = false;
-        isGameScreen = false;
+        isGame02Screen = false;
         
 
         backgroundMusic = new Audio("src/audio/menuBGM.wav", true);
@@ -98,7 +99,7 @@ public class ShootingGame extends JFrame {
             	game.setPlayer(playerImage);
                 backgroundMusic.stop();
                 isGameStartAlertScreen = false;
-                isGameScreen = true;
+                isGame02Screen = true;
                 
                 game.start();
             }
@@ -138,8 +139,8 @@ public class ShootingGame extends JFrame {
         if (isGameStartAlertScreen) {
             g.drawImage(gamestartalertScreen, 0, 0, null);
         }
-        if (isGameScreen) {
-            g.drawImage(gameScreen, 0, 0, null);
+        if (isGame02Screen) {
+            g.drawImage(game02Screen, 0, 0, null);
             game.gameDraw(g);
         }
         this.repaint();
