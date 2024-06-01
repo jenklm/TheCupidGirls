@@ -105,25 +105,21 @@ public class Game extends Thread {
     }
 
     private void playerAttackProcess() {
-        for (int i = 0; i < playerAttackList.size(); i++) {
+    	for (int i = 0; i < playerAttackList.size(); i++) {
             playerAttack = playerAttackList.get(i);
             playerAttack.fire();
 
             for (int j = 0; j < enemyList.size(); j++) {
                 enemy = enemyList.get(j);
                 if (playerAttack.x > enemy.x && playerAttack.x < enemy.x + enemy.width && playerAttack.y > enemy.y && playerAttack.y < enemy.y + enemy.height) {
-                	 enemy.hit();
-                     playerAttackList.remove(playerAttack);
-                     hitSound.start();
-                     break;
-                }
-                if (enemy.hp <= 0) {
-                    
-                    enemyList.remove(enemy);
-                    score += 1000;
+                    enemy.hit();
+                    playerAttackList.remove(playerAttack);
+                    hitSound.start();
+                    score += 1000; // 점수를 즉시 증가시킵니다.
+                    break;
                 }
             }
-        }
+    	}
     }
 
     private void enemyAppearProcess() {
@@ -206,7 +202,7 @@ public class Game extends Thread {
         for (int i = 0; i< enemyList.size(); i++) {
             enemy = enemyList.get(i);
             if (enemy.getState() == Enemy.ALIVE) {
-                g.drawImage(enemy.monster, enemy.x, enemy.y, null);
+                g.drawImage(enemy.enemy01_01, enemy.x, enemy.y, null);
                 
             } else if (enemy.getState() == Enemy.HIT) {
                 g.drawImage(enemy.getAnimationFrame(), enemy.x, enemy.y, null);

@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Enemy {
-    Image monster;
+    Image enemy01_01;
     Image explosionImage; // Replace with your explosion image
     int x, y;
     int width;
@@ -22,17 +22,21 @@ public class Enemy {
         this.state = ALIVE;
         
         // Load the original monster image
-        Image originalImage = new ImageIcon("src/images/monster01.png").getImage();
-        int originalWidth = originalImage.getWidth(null);
-        int originalHeight = originalImage.getHeight(null);
+        Image originalImage01 = new ImageIcon("src/images/enemy01_01.png").getImage();
+        int originalWidth01 = originalImage01.getWidth(null);
+        int originalHeight01 = originalImage01.getHeight(null);
 
-        // Scale the image to 50%
-        width = originalWidth / 2;
-        height = originalHeight / 2;
-        monster = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        // Scale the image
+        width = (int) (originalWidth01 * 2 / 3.0);
+        height = (int) (originalHeight01 * 2 / 3.0);
+        enemy01_01 = originalImage01.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 
         // Load and scale the explosion image if needed
-        Image originalExplosionImage = new ImageIcon("src/images/enemy.png").getImage();
+        Image originalExplosionImage = new ImageIcon("src/images/enemy01_02.png").getImage();
+        int originalWidth02 = originalExplosionImage.getWidth(null);
+        int originalHeight02 = originalExplosionImage.getHeight(null);
+        width = (int) (originalWidth02 * 2 / 3.0);
+        height = (int) (originalHeight02 * 2 / 3.0);
         explosionImage = originalExplosionImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
     }
 
@@ -44,7 +48,7 @@ public class Enemy {
     
     public void hit() {
         this.state = HIT;
-        this.animationCnt = 20; // duration of the hit animation
+        this.animationCnt = 10; // duration of the hit animation
     }
 
     public void update() {
