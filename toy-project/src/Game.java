@@ -112,11 +112,13 @@ public class Game extends Thread {
             for (int j = 0; j < enemyList.size(); j++) {
                 enemy = enemyList.get(j);
                 if (playerAttack.x > enemy.x && playerAttack.x < enemy.x + enemy.width && playerAttack.y > enemy.y && playerAttack.y < enemy.y + enemy.height) {
-                    enemy.hp  -= playerAttack.attack;
-                    playerAttackList.remove(playerAttack);
+                	 enemy.hit();
+                     playerAttackList.remove(playerAttack);
+                     hitSound.start();
+                     break;
                 }
                 if (enemy.hp <= 0) {
-                    hitSound.start();
+                    
                     enemyList.remove(enemy);
                     score += 1000;
                 }
@@ -135,6 +137,11 @@ public class Game extends Thread {
         for (int i = 0; i< enemyList.size(); i++) {
             enemy = enemyList.get(i);
             enemy.move();
+            enemy.update(); // Update the enemy state
+            if (!enemy.isAlive()) {
+                enemyList.remove(i);
+                i--; // Adjust the index after removal
+            }
         }
     }
 
@@ -198,10 +205,13 @@ public class Game extends Thread {
     public void enemyDraw(Graphics g) {
         for (int i = 0; i< enemyList.size(); i++) {
             enemy = enemyList.get(i);
-            g.drawImage(enemy.image, enemy.x, enemy.y, null);
-            g.setColor(Color.GREEN);
-            g.fillRect(enemy.x + 1, enemy.y - 40, enemy.hp * 15, 20);
-        }
+            if (enemy.getState() == Enemy.ALIVE) {
+                g.drawImage(enemy.monster, enemy.x, enemy.y, null);
+                
+            } else if (enemy.getState() == Enemy.HIT) {
+                g.drawImage(enemy.getAnimationFrame(), enemy.x, enemy.y, null);
+            }
+        } 
         for (int i = 0; i < enemyAttackList.size(); i++) {
             enemyAttack = enemyAttackList.get(i);
             g.drawImage(enemyAttack.image, enemyAttack.x, enemyAttack.y, null);
