@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Game extends Thread {
     private int delay = 20;
@@ -33,6 +35,8 @@ public class Game extends Thread {
 
     private Audio backgroundMusic;
     private Audio hitSound;
+    
+    private boolean showRestartMessage = false;
     
     // 생성자에서 이미지 로드 및 크기 조정
     public Game() {
@@ -69,12 +73,22 @@ public class Game extends Thread {
                     }
                 }
             }
+            if (isOver && !showRestartMessage) {
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        showRestartMessage = true;
+                    }
+                }, 3000); // 3초 후에 showRestartMessage를 true로 설정
+            }
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        
     }
 
     public void reset() {
@@ -120,6 +134,10 @@ public class Game extends Thread {
                 }
             }
     	}
+    	
+    	if (score >= 5000) {
+            isOver = true;
+        }
     }
 
     private void enemyAppearProcess() {
@@ -133,10 +151,10 @@ public class Game extends Thread {
         for (int i = 0; i< enemyList.size(); i++) {
             enemy = enemyList.get(i);
             enemy.move();
-            enemy.update(); // Update the enemy state
+            enemy.update(); 
             if (!enemy.isAlive()) {
                 enemyList.remove(i);
-                i--; // Adjust the index after removal
+                i--; 
             }
         }
     }
@@ -170,20 +188,42 @@ public class Game extends Thread {
     }
 
     public void infoDraw(Graphics g) {
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 40));
-        g.drawString("SCORE : " + score, 40, 80);
+    	g.setColor(Color.WHITE);
+    	g.setFont(new Font("Inter", Font.BOLD, 35));
+    	String scoreText = "SCORE : " + score;
+    	int scoreY = 55; // 상단에서 15픽셀 간격 유지
+    	Rectangle scoreRect = new Rectangle(0, 0, Main.SCREEN_WIDTH, g.getFontMetrics().getHeight());
+    	scoreRect.setLocation(0, scoreY);  // scoreY 값을 기준으로 위치 설정
+    	drawCenteredString(g, scoreText, scoreRect);
+        
         if (isOver) {
-            g.setColor(Color.BLACK);
-            g.setFont(new Font("Arial", Font.BOLD, 80));
-            g.drawString("Press R to restart", 295, 380);
+            if (showRestartMessage) {
+                g.setColor(Color.BLACK);
+                g.setFont(new Font("Irish Grover", Font.BOLD, 80));
+                drawCenteredString(g, "Press R to restart", new Rectangle(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
+            } else {
+                g.setColor(Color.BLACK);
+                g.setFont(new Font("Irish Grover", Font.BOLD, 120));
+                if (score >= 5000) {
+                    drawCenteredString(g, "GAME CLEAR", new Rectangle(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
+                } else {
+                    drawCenteredString(g, "GAME OVER", new Rectangle(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
+                }
+            }
         }
+    }
+    
+    private void drawCenteredString(Graphics g, String text, Rectangle rect) {
+        FontMetrics metrics = g.getFontMetrics(g.getFont());
+        int x = rect.x + (rect.width - metrics.stringWidth(text)) / 2;
+        int y = rect.y + ((rect.height - metrics.getHeight()) / 2) + metrics.getAscent();
+        g.drawString(text, x, y);
     }
 
     public void playerDraw(Graphics g) {
         g.drawImage(player, playerX, playerY, null);
         
-        // Draw hearts in the top left corner without gaps
+        
         int heartWidth = playerheart.getWidth(null);
 
         for (int i = 0; i < playerHp; i++) {
@@ -191,6 +231,11 @@ public class Game extends Thread {
             g.drawImage(playerheart, heartX, 10, null);
         }
 
+        if (!isOver) {
+            g.setColor(Color.WHITE); // Adjust color as needed
+            g.setFont(new Font("Inter", Font.BOLD, 30)); // Adjust font and size as needed
+            g.drawString("5000점을 달성하세요!", 25, 140);
+          }
         
         for (int i = 0; i < playerAttackList.size(); i++) {
             playerAttack = playerAttackList.get(i);

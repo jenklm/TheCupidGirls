@@ -3,7 +3,7 @@ import java.awt.*;
 
 public class Enemy {
     Image enemy01_01;
-    Image explosionImage; // Replace with your explosion image
+    Image explosionImage; 
     int x, y;
     int width;
     int height;
@@ -21,17 +21,17 @@ public class Enemy {
         this.y = y;
         this.state = ALIVE;
         
-        // Load the original monster image
+        
         Image originalImage01 = new ImageIcon("src/images/enemy01_01.png").getImage();
         int originalWidth01 = originalImage01.getWidth(null);
         int originalHeight01 = originalImage01.getHeight(null);
 
-        // Scale the image
+        
         width = (int) (originalWidth01 * 2 / 3.0);
         height = (int) (originalHeight01 * 2 / 3.0);
         enemy01_01 = originalImage01.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 
-        // Load and scale the explosion image if needed
+        
         Image originalExplosionImage = new ImageIcon("src/images/enemy01_02.png").getImage();
         int originalWidth02 = originalExplosionImage.getWidth(null);
         int originalHeight02 = originalExplosionImage.getHeight(null);
@@ -48,7 +48,7 @@ public class Enemy {
     
     public void hit() {
         this.state = HIT;
-        this.animationCnt = 10; // duration of the hit animation
+        this.animationCnt = 10; // 애니메이션 duration
     }
 
     public void update() {
@@ -69,7 +69,6 @@ public class Enemy {
     }
 
     public Image getAnimationFrame() {
-        // Return the explosion image. You can modify this method to return different frames if you have an animated sequence
         return explosionImage;
     }
 }
