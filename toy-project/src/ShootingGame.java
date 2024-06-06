@@ -111,7 +111,7 @@ public class ShootingGame extends JFrame {
         bufferImage = createImage(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
         screenGraphic = bufferImage.getGraphics();
         screenDraw(screenGraphic);
-        g.drawImage(bufferImage, 0, 0, null);
+        g.drawImage(bufferImage, 0, 0, this);
     }
 
     public void screenDraw(Graphics g) {
@@ -311,9 +311,43 @@ public class ShootingGame extends JFrame {
                 	 gameStart(selectedCharacterImage);
                 }
             } 
+            else if (isGame02Screen) {
+                // 설정 아이콘 클릭 시 설정 패널을 표시
+                if (mouseX >= 1200 && mouseX <= 1255 && mouseY >= 30 && mouseY <= 85) {
+                    showSettingsPanel();
+                }
+            }
+               
         
         }
+        
+        private void showSettingsPanel() {
+        	
+        	
+        	
+            JFrame settingsFrame = new JFrame("Settings");
+            settingsFrame.setSize(900, 500);
+            //settingsFrame.setUndecorated(true);
+            settingsFrame.setLayout(new BorderLayout());
+            settingsFrame.getContentPane().setBackground(Color.BLACK); // 패널의 배경색을 검은색으로 설정
+
+            JLabel settingsLabel = new JLabel("Settings Panel", SwingConstants.CENTER);
+            settingsLabel.setForeground(Color.WHITE); // 글자 색을 흰색으로 설정하여 검은 배경에서 잘 보이도록 함
+            settingsFrame.add(settingsLabel, BorderLayout.CENTER);
+            
+            
+            
+            // 화면의 가운데에 오도록 설정
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            int x = (screenSize.width - settingsFrame.getWidth()) / 2;
+            int y = (screenSize.height - settingsFrame.getHeight()) / 2;
+            settingsFrame.setLocation(x, y);
+            
+            settingsFrame.setVisible(true);
+        }
+
     }
+    
     
     
     public static void main(String[] args) {

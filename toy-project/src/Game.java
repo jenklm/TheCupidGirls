@@ -12,6 +12,8 @@ public class Game extends Thread {
 
     private Image player; //
     private Image playerheart;
+    
+    private Image settings;
 
     private int playerX, playerY;
     private int playerWidth;
@@ -21,6 +23,9 @@ public class Game extends Thread {
 
     private boolean thisStage; // 
     private boolean up, down, left, right, shooting;
+    
+
+    
     private boolean isOver;
     private boolean nextStage = false; //
     private boolean gameOver = false; //
@@ -48,7 +53,17 @@ public class Game extends Thread {
         int heartWidth = originalHeartImage.getWidth(null) / 3;
         int heartHeight = originalHeartImage.getHeight(null) / 3;
         playerheart = originalHeartImage.getScaledInstance(heartWidth, heartHeight, Image.SCALE_SMOOTH);
+        
+        String settingsImagePath = "src/images/settings.png";
+        Image originalSettingsImage = new ImageIcon(settingsImagePath).getImage();
+        int settingsWidth = originalHeartImage.getWidth(null) / 3;
+        int settingsHeight = originalHeartImage.getHeight(null) / 3;
+        settings = originalSettingsImage.getScaledInstance(settingsWidth, settingsHeight, Image.SCALE_SMOOTH);
+        
     }
+    
+ 
+
 
     @Override
     public void run() {
@@ -68,6 +83,12 @@ public class Game extends Thread {
                         enemyMoveProcess();
                         enemyAttackProcess();
                         cnt++;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -211,6 +232,10 @@ public class Game extends Thread {
                 }
             }
         }
+        
+        int settingsX = Main.SCREEN_WIDTH - settings.getWidth(null) - 10;
+        int settingsY = 10;
+        g.drawImage(settings, settingsX, settingsY, null);
     }
     
     private void drawCenteredString(Graphics g, String text, Rectangle rect) {
@@ -279,6 +304,8 @@ public class Game extends Thread {
 		return this.thisStage;
 		
 	}
+    
+
     
     //
     public boolean nextStage() {
