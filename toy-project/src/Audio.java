@@ -4,21 +4,16 @@ import java.io.IOException;
 
 public class Audio {
     private Clip clip;
-    private File audioFile;
     private AudioInputStream audioInputStream;
     private boolean isLoop;
 
     public Audio(String pathName, boolean isLoop) {
+    	this.isLoop = isLoop;
         try {
             clip = AudioSystem.getClip();
-            audioFile = new File(pathName);
-            audioInputStream = AudioSystem.getAudioInputStream(audioFile);
+            audioInputStream = AudioSystem.getAudioInputStream(new File(pathName));
             clip.open(audioInputStream);
-        } catch (LineUnavailableException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (UnsupportedAudioFileException e) {
+        } catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
             e.printStackTrace();
         }
     }
@@ -30,6 +25,9 @@ public class Audio {
     }
 
     public void stop() {
-        clip.stop();
+    	 if (clip != null) {
+             clip.stop();
+             clip.setFramePosition(0); // Reset to the beginning
+         }
     }
 }

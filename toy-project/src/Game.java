@@ -6,7 +6,6 @@ import java.util.TimerTask;
 
 public class Game extends Thread {
     private int delay = 20;
-    private long pretime;
     private int cnt;
     private int score;
 
@@ -60,6 +59,12 @@ public class Game extends Thread {
         int settingsHeight = originalHeartImage.getHeight(null) / 3;
         settings = originalSettingsImage.getScaledInstance(settingsWidth, settingsHeight, Image.SCALE_SMOOTH);
         
+        try {
+            hitSound = new Audio("src/audio/hitSound.wav", false);
+        } catch (Exception e) {
+            System.err.println("Error loading hit sound: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
  
@@ -67,49 +72,56 @@ public class Game extends Thread {
 
     @Override
     public void run() {
-        backgroundMusic = new Audio("src/audio/gameBGM.wav", true);
-        hitSound = new Audio("src/audio/hitSound.wav", false);
-
-        reset();
-        while (true) {
-            while (!isOver) {
-                pretime = System.currentTimeMillis();
-                if (System.currentTimeMillis() - pretime < delay) {
-                    try {
-                        Thread.sleep(delay - System.currentTimeMillis() + pretime);
-                        keyProcess();
-                        playerAttackProcess();
-                        enemyAppearProcess();
-                        enemyMoveProcess();
-                        enemyAttackProcess();
-                        cnt++;
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if (isOver && !showRestartMessage) {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        showRestartMessage = true;
-                    }
-                }, 3000); // 3초 후에 showRestartMessage를 true로 설정
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    	
+    	// 게임 시작 시 배경 음악을 재생하는 코드
+        if (backgroundMusic != null) {
+            backgroundMusic.start();
+        } else {
+            backgroundMusic = new Audio("src/audio/gameBGM.wav", true);
+            backgroundMusic.start();
         }
         
+        while (true) {
+            synchronized(this) {
+                while (!isOver) {
+                    long startTime = System.currentTimeMillis();
+                    
+                    keyProcess();
+                    playerAttackProcess();
+                    enemyAppearProcess();
+                    enemyMoveProcess();
+                    enemyAttackProcess();
+                    
+                    cnt++;
+                    
+                    long endTime = System.currentTimeMillis();
+                    long sleepTime = delay - (endTime - startTime);
+                    if (sleepTime > 0) {
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                
+                if (isOver && !showRestartMessage) {
+                    Timer timer = new Timer();
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            showRestartMessage = true;
+                        }
+                    }, 3000); // 3초 후에 showRestartMessage를 true로 설정
+                }
+                
+                try {
+                    wait(); // 게임이 리셋되거나 새로 시작되기를 대기
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void reset() {
@@ -121,11 +133,30 @@ public class Game extends Thread {
         playerY = (Main.SCREEN_HEIGHT - playerHeight) / 2;
         playerHp = 5; // restart 했을 때, playerHP 바 안보이는 버그 해결..
 
-        backgroundMusic.start();
-
         playerAttackList.clear();
         enemyList.clear();
         enemyAttackList.clear();
+        
+        // 배경음악 중지 및 재시작
+        if (backgroundMusic != null) {
+            backgroundMusic.stop();
+        }
+        backgroundMusic = new Audio("src/audio/gameBGM.wav", true);
+        backgroundMusic.start();
+
+        // 초기화 시 효과음 중지
+        if (hitSound != null) {
+            hitSound.stop();
+        }
+
+        // 게임 루프가 새로운 상태로 동작하도록 초기화
+        nextStage = false;
+        showRestartMessage = false;
+
+        // 초기화 시 스레드 재시작
+        synchronized(this) {
+            notify(); // 스레드가 대기 상태일 경우 깨움
+        }
     }
 
     private void keyProcess() {
@@ -146,10 +177,18 @@ public class Game extends Thread {
 
             for (int j = 0; j < enemyList.size(); j++) {
                 enemy = enemyList.get(j);
-                if (playerAttack.x > enemy.x && playerAttack.x < enemy.x + enemy.width && playerAttack.y > enemy.y && playerAttack.y < enemy.y + enemy.height) {
+                if (playerAttack.x > enemy.x && playerAttack.x < enemy.x + enemy.width &&
+                    playerAttack.y > enemy.y && playerAttack.y < enemy.y + enemy.height) {
                     enemy.hit();
                     playerAttackList.remove(playerAttack);
-                    hitSound.start();
+
+                    // Play hit sound if it is initialized
+                    if (hitSound != null) {
+                        hitSound.start();
+                    } else {
+                        System.err.println("hitSound is not initialized.");
+                    }
+
                     score += 1000; // 점수를 즉시 증가시킵니다.
                     break;
                 }

@@ -106,6 +106,28 @@ public class ShootingGame extends JFrame {
         };
         loadingTimer.schedule(loadingTask, 3000);
     }
+    
+    private void returnToMainScreen() {
+        isMainScreen = true;
+        isSelectCharScreen = false;
+        isSelectChar01Screen = false;
+        isSelectChar02Screen = false;
+        isSelectChar03Screen = false;
+        isNicknameScreen = false;
+        isGameStartAlertScreen = false;
+        isHowtoPlayScreen = false;
+        isGame02Screen = false;
+
+        // 게임 상태 초기화
+        game.reset();
+
+        // 배경 음악 재생
+        if (backgroundMusic != null) {
+            backgroundMusic.stop();
+        }
+        backgroundMusic = new Audio("src/audio/menuBGM.wav", true);
+        backgroundMusic.start();
+    }
 
     public void paint(Graphics g) {
         bufferImage = createImage(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
@@ -329,14 +351,30 @@ public class ShootingGame extends JFrame {
             settingsFrame.setSize(900, 500);
             //settingsFrame.setUndecorated(true);
             settingsFrame.setLayout(new BorderLayout());
-            settingsFrame.getContentPane().setBackground(Color.BLACK); // 패널의 배경색을 검은색으로 설정
+            settingsFrame.getContentPane().setBackground(Color.lightGray); // 패널의 배경색을 검은색으로 설정
 
             JLabel settingsLabel = new JLabel("Settings Panel", SwingConstants.CENTER);
             settingsLabel.setForeground(Color.WHITE); // 글자 색을 흰색으로 설정하여 검은 배경에서 잘 보이도록 함
             settingsFrame.add(settingsLabel, BorderLayout.CENTER);
             
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.setBackground(Color.black);
             
+            JButton returnButton = new JButton("Return to Main Screen");
+            returnButton.setFont(new Font("Arial", Font.PLAIN, 18));
+            returnButton.setBackground(Color.WHITE);
+            returnButton.setFocusPainted(false);
+
+            returnButton.addActionListener(e -> {
+                returnToMainScreen();
+                settingsFrame.dispose();  // 설정 창 닫기
+            });
+
+            buttonPanel.add(returnButton);
             
+            settingsFrame.add(settingsLabel, BorderLayout.CENTER);
+            settingsFrame.add(buttonPanel, BorderLayout.SOUTH);
+
             // 화면의 가운데에 오도록 설정
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             int x = (screenSize.width - settingsFrame.getWidth()) / 2;
