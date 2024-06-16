@@ -62,7 +62,7 @@ public class Game extends Thread {
         settings = originalSettingsImage.getScaledInstance(settingsWidth, settingsHeight, Image.SCALE_SMOOTH);
         
         try {
-            hitSound = new Audio("src/audio/hitSound.wav", false);
+            hitSound = new Audio("src/audio/hit.wav", false);
         } catch (Exception e) {
             System.err.println("Error loading hit sound: " + e.getMessage());
             e.printStackTrace();
