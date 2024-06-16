@@ -11,6 +11,10 @@ public class ShootingGame extends JFrame {
     private Image bufferImage;
     private Graphics screenGraphic;
 
+    private JPanel nicknamePanel;
+    private JTextField nicknameField;
+    private JButton confirmButton;
+    
     private Image mainScreen = new ImageIcon("src/images/main_screen.png").getImage();
     private Image howtoplayscreen = new ImageIcon("src/images/howtoplay_screen.png").getImage();
     private Image selectcharScreen = new ImageIcon("src/images/selectchar_screen.png").getImage(); //
@@ -45,6 +49,29 @@ public class ShootingGame extends JFrame {
         setVisible(true);
         setLayout(null);
 
+        nicknamePanel = new JPanel();
+        nicknamePanel.setBounds(300, 300, 600, 200); 
+        nicknamePanel.setBackground(Color.WHITE);
+        nicknamePanel.setLayout(null);
+        
+        nicknameField = new JTextField();
+        nicknameField.setBounds(50, 50, 300, 30);
+        nicknameField.setEditable(true);
+        nicknamePanel.add(nicknameField);
+        
+        confirmButton = new JButton("확인"); 
+        confirmButton.setBounds(380, 50, 100, 30);
+        confirmButton.addActionListener(e -> handleConfirmButtonClick());
+        nicknamePanel.add(confirmButton);
+        
+        // nicknameField에 텍스트 입력 안되는 오류 해결하기 위한 수정코드01
+        SwingUtilities.invokeLater(() -> {
+            nicknameField.requestFocusInWindow();
+        });
+        
+        add(nicknamePanel);
+        
+        
         init();
     }
 
@@ -80,8 +107,19 @@ public class ShootingGame extends JFrame {
         isSelectCharScreen = true;
     }
     
+    private void handleConfirmButtonClick() {
+        String nickname = nicknameField.getText().trim();
+        
+        if (!nickname.isEmpty()) {
 
-    private void gameStart(Image playerImage) {
+            isNicknameScreen = false; 
+            gameStart(selectedCharacterImage, nickname); 
+        } else {
+            JOptionPane.showMessageDialog(this, "닉네임을 입력해주세요.", "알림", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void gameStart(Image playerImage, String nickname) {
         isMainScreen = false;
         isSelectCharScreen = false;
         isSelectChar01Screen = false;
@@ -91,6 +129,7 @@ public class ShootingGame extends JFrame {
         isGameStartAlertScreen = true;
         
         game.setPlayer(playerImage);
+        game.setNickname(nickname); // 게임 객체에 닉네임 설정
         
         Timer loadingTimer = new Timer();
         TimerTask loadingTask = new TimerTask() {
@@ -102,6 +141,12 @@ public class ShootingGame extends JFrame {
                 isGame02Screen = true;
                 
                 game.start();
+                requestFocus();
+                
+             // nicknameField에 텍스트 입력 안되는 오류 해결하기 위한 수정코드02
+                SwingUtilities.invokeLater(() -> {
+                    requestFocus();
+                });
             }
         };
         loadingTimer.schedule(loadingTask, 3000);
@@ -134,6 +179,15 @@ public class ShootingGame extends JFrame {
         screenGraphic = bufferImage.getGraphics();
         screenDraw(screenGraphic);
         g.drawImage(bufferImage, 0, 0, this);
+        
+        if (isNicknameScreen) {
+            g.drawImage(nicknameScreen, 0, 0, null);
+            // nicknamePanel의 위치를 계산하여 그립니다.
+            int panelX = (Main.SCREEN_WIDTH - nicknamePanel.getWidth()) / 2;
+            int panelY = (Main.SCREEN_HEIGHT - nicknamePanel.getHeight()) / 2;
+            nicknamePanel.setBounds(panelX, panelY, nicknamePanel.getWidth(), nicknamePanel.getHeight());
+            nicknamePanel.paint(g);
+        }
     }
 
     public void screenDraw(Graphics g) {
@@ -230,6 +284,14 @@ public class ShootingGame extends JFrame {
                     selectChar();
                 } else if (mouseX >= 827 && mouseX <= 1160 && mouseY >= 494 && mouseY <= 608) {
                     showHowtoPlayScreen();
+                }else if (isNicknameScreen) {
+                    // 닉네임 입력 화면에서 다음 버튼을 클릭했을 때
+                    if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
+                        String nickname = nicknameField.getText(); // 입력된 닉네임 가져오기
+                        isNicknameScreen = false;
+                        isGameStartAlertScreen = true;
+                        gameStart(selectedCharacterImage, nickname); // 닉네임과 캐릭터 이미지 전달하여 게임 시작
+                    }
                 }
             } else if (isHowtoPlayScreen) {
                 if (mouseX >= 62 && mouseX <= 97 && mouseY >= 64 && mouseY <= 99) {
@@ -330,7 +392,8 @@ public class ShootingGame extends JFrame {
                 // 다음 스크린으로 가기 구현.
                 else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
                 	 isNicknameScreen = false;
-                	 gameStart(selectedCharacterImage);
+                	 String nickname = nicknameField.getText();
+                	 gameStart(selectedCharacterImage, nickname);
                 }
             } 
             else if (isGame02Screen) {
@@ -338,6 +401,10 @@ public class ShootingGame extends JFrame {
                 if (mouseX >= 1200 && mouseX <= 1255 && mouseY >= 30 && mouseY <= 85) {
                     showSettingsPanel();
                 }
+            }
+            
+            if (isNicknameScreen && confirmButton.getBounds().contains(e.getPoint())) {
+                handleConfirmButtonClick();
             }
                
         

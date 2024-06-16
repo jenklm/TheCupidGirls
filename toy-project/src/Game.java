@@ -20,6 +20,8 @@ public class Game extends Thread {
     private int playerSpeed = 10;
     private int playerHp = 5;
 
+    private String nickname;
+    
     private boolean thisStage; // 
     private boolean up, down, left, right, shooting;
     
@@ -159,6 +161,10 @@ public class Game extends Thread {
         }
     }
 
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    
     private void keyProcess() {
         if (up && playerY - playerSpeed > 0) playerY -= playerSpeed;
         if (down && playerY + playerHeight + playerSpeed < Main.SCREEN_HEIGHT) playerY += playerSpeed;
@@ -265,9 +271,9 @@ public class Game extends Thread {
                 g.setColor(Color.BLACK);
                 g.setFont(new Font("Irish Grover", Font.BOLD, 120));
                 if (score >= 5000) {
-                    drawCenteredString(g, "GAME CLEAR", new Rectangle(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
+                    drawCenteredString(g, nickname + ", GAME CLEAR", new Rectangle(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
                 } else {
-                    drawCenteredString(g, "GAME OVER", new Rectangle(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
+                    drawCenteredString(g, nickname + ", GAME OVER", new Rectangle(0, 0, Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT));
                 }
             }
         }
