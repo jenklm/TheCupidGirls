@@ -151,7 +151,7 @@ public class ShootingGame extends JFrame {
         };
         loadingTimer.schedule(loadingTask, 3000);
     }
-    
+     
     private void returnToMainScreen() {
         isMainScreen = true;
         isSelectCharScreen = false;
@@ -182,10 +182,12 @@ public class ShootingGame extends JFrame {
         
         if (isNicknameScreen) {
             g.drawImage(nicknameScreen, 0, 0, null);
-            // nicknamePanel의 위치를 계산하여 그립니다.
+            
+            // nicknamePanel의 위치를 계산.
             int panelX = (Main.SCREEN_WIDTH - nicknamePanel.getWidth()) / 2;
             int panelY = (Main.SCREEN_HEIGHT - nicknamePanel.getHeight()) / 2;
             nicknamePanel.setBounds(panelX, panelY, nicknamePanel.getWidth(), nicknamePanel.getHeight());
+            
             nicknamePanel.paint(g);
         }
     }
