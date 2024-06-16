@@ -27,7 +27,7 @@ public class Audio {
     public void stop() {
     	 if (clip != null) {
              clip.stop();
-             clip.setFramePosition(0); // Reset to the beginning
+             clip.setFramePosition(0); 
          }
     }
 }

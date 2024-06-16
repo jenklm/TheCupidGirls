@@ -182,14 +182,14 @@ public class Game extends Thread {
                     enemy.hit();
                     playerAttackList.remove(playerAttack);
 
-                    // Play hit sound if it is initialized
+                    
                     if (hitSound != null) {
                         hitSound.start();
                     } else {
                         System.err.println("hitSound is not initialized.");
                     }
 
-                    score += 1000; // 점수를 즉시 증가시킵니다.
+                    score += 1000; // 점수 즉시 증가.
                     break;
                 }
             }
@@ -296,8 +296,8 @@ public class Game extends Thread {
         }
 
         if (!isOver) {
-            g.setColor(Color.WHITE); // Adjust color as needed
-            g.setFont(new Font("Inter", Font.BOLD, 30)); // Adjust font and size as needed
+            g.setColor(Color.WHITE); 
+            g.setFont(new Font("Inter", Font.BOLD, 30)); 
             g.drawString("5000점을 달성하세요!", 25, 140);
           }
         
