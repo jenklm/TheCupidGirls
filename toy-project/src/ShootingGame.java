@@ -1,9 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter; //
-import java.awt.event.MouseEvent; //
+import java.awt.event.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,11 +29,15 @@ public class ShootingGame extends JFrame {
     private Image selectedCharacterImage;
     
     private boolean isMainScreen, isSelectCharScreen, isSelectChar01Screen, isSelectChar02Screen, isSelectChar03Screen, isNicknameScreen, isGameStartAlertScreen, isHowtoPlayScreen, isGame02Screen; //
-
+    
+    private boolean isPaused = false;
+    
     private Game game = new Game();
 
     
     private Audio backgroundMusic;
+    private Audio gameMusic = new Audio("src/audio/gameBGM.wav", false);
+    private float currentVolume = 0.5f;
    
 
     public ShootingGame() {
@@ -89,9 +90,26 @@ public class ShootingGame extends JFrame {
 
         backgroundMusic = new Audio("src/audio/menuBGM.wav", true);
         backgroundMusic.start();
+        backgroundMusic.setVolume(currentVolume);
 
-        addKeyListener(new KeyListener());
-        addMouseListener(new MouseListener()); //
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                handlekeyPressed(e);
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                handlekeyReleased(e);
+            }
+        });
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                handlemouseClicked(e);
+            }
+        });
     }
     
     
@@ -162,17 +180,21 @@ public class ShootingGame extends JFrame {
         isGameStartAlertScreen = false;
         isHowtoPlayScreen = false;
         isGame02Screen = false;
-
+        
         // 게임 상태 초기화
         game.reset();
 
         // 배경 음악 재생
-        if (backgroundMusic != null) {
-            backgroundMusic.stop();
+        if (gameMusic != null) {
+            gameMusic.stop();
         }
         backgroundMusic = new Audio("src/audio/menuBGM.wav", true);
         backgroundMusic.start();
+        
+        isPaused = false;
     }
+    
+  
 
     public void paint(Graphics g) {
         bufferImage = createImage(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
@@ -191,6 +213,13 @@ public class ShootingGame extends JFrame {
             nicknamePanel.paint(g);
         }
     }
+    
+    private void adjustVolume(float volume) {
+        currentVolume = volume; // Update current volume
+        backgroundMusic.setVolume(volume);
+    }
+    
+    
 
     public void screenDraw(Graphics g) {
         if (isMainScreen) {
@@ -217,247 +246,241 @@ public class ShootingGame extends JFrame {
         if (isGameStartAlertScreen) {
             g.drawImage(gamestartalertScreen, 0, 0, null);
         }
-        if (isGame02Screen) {
-            g.drawImage(game02Screen, 0, 0, null);
-            game.gameDraw(g);
+        if (!isPaused) {
+            if (isMainScreen) {
+                g.drawImage(mainScreen, 0, 0, null);
+            }
+            // Draw other screens and game components here
+            if (isGame02Screen) {
+                g.drawImage(game02Screen, 0, 0, null);
+                game.gameDraw(g); // Draw game components
+            }
         }
         this.repaint();
     }
+    private void handlekeyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP:
+                game.setUp(true);
+                break;
+            case KeyEvent.VK_DOWN:
+                game.setDown(true);
+                break;
+            case KeyEvent.VK_LEFT:
+                game.setLeft(true);
+                break;
+            case KeyEvent.VK_RIGHT:
+                game.setRight(true);
+                break;
+            case KeyEvent.VK_R:
+                if (game.isOver()) game.reset();
+                break;
+            case KeyEvent.VK_SPACE:
+                game.setShooting(true);
+                break;
+            case KeyEvent.VK_ESCAPE:
+            	if (isGame02Screen) {
+                    if (!isPaused) {
+                        isPaused = true;
+                        showSettingsPanel();
+                    } else {
+                        isPaused = false;
+                        
+                    }
+                } else {
+                    System.exit(0);
+                }
+                break;
+        }
+    }
 
-    class KeyListener extends KeyAdapter {
-        public void keyPressed(KeyEvent e) {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_UP:
-                    game.setUp(true);
-                    break;
-                case KeyEvent.VK_DOWN:
-                    game.setDown(true);
-                    break;
-                case KeyEvent.VK_LEFT:
-                    game.setLeft(true);
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    game.setRight(true);
-                    break;
-                case KeyEvent.VK_R:
-                    if (game.isOver()) game.reset();
-                    break;
-                case KeyEvent.VK_SPACE:
-                    game.setShooting(true);
-                    break;
-                
-                case KeyEvent.VK_ESCAPE:
-                    System.exit(0);  
-                    break;
-              
+    private void handlekeyReleased(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP:
+                game.setUp(false);
+                break;
+            case KeyEvent.VK_DOWN:
+                game.setDown(false);
+                break;
+            case KeyEvent.VK_LEFT:
+                game.setLeft(false);
+                break;
+            case KeyEvent.VK_RIGHT:
+                game.setRight(false);
+                break;
+            case KeyEvent.VK_SPACE:
+                game.setShooting(false);
+                break;
+        }
+    }
+
+    private void handlemouseClicked(MouseEvent e) {
+        int mouseX = e.getX();
+        int mouseY = e.getY();
+
+        if (isMainScreen) {
+            if (mouseX >= 827 && mouseX <= 1160 && mouseY >= 329 && mouseY <= 443) {
+                selectChar();
+            } else if (mouseX >= 827 && mouseX <= 1160 && mouseY >= 494 && mouseY <= 608) {
+                showHowtoPlayScreen();
+            }
+        } else if (isHowtoPlayScreen) {
+            if (mouseX >= 62 && mouseX <= 97 && mouseY >= 64 && mouseY <= 99) {
+                isHowtoPlayScreen = false;
+                isMainScreen = true;
+            } else if (mouseX >= 519 && mouseX <= 762 && mouseY >= 569 && mouseY <= 648) {
+                isHowtoPlayScreen = false;
+                isSelectCharScreen = true;
+            }
+        } else if (isSelectCharScreen) {
+            if (mouseX >= 170 && mouseX <= 448 && mouseY >= 274 && mouseY <= 629) {
+                isSelectCharScreen = false;
+                isSelectChar01Screen = true;
+            } else if (mouseX >= 501 && mouseX <= 779 && mouseY >= 274 && mouseY <= 629) {
+                isSelectCharScreen = false;
+                isSelectChar02Screen = true;
+            } else if (mouseX >= 832 && mouseX <= 1110 && mouseY >= 274 && mouseY <= 629) {
+                isSelectCharScreen = false;
+                isSelectChar03Screen = true;
+            } else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
+                isSelectCharScreen = false;
+                isMainScreen = true;
+            } else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
+                isSelectCharScreen = false;
+                isNicknameScreen = true;
+            }
+        } else if (isSelectChar01Screen) {
+            if (mouseX >= 501 && mouseX <= 779 && mouseY >= 274 && mouseY <= 629) {
+                isSelectChar01Screen = false;
+                isSelectChar02Screen = true;
+            } else if (mouseX >= 832 && mouseX <= 1110 && mouseY >= 274 && mouseY <= 629) {
+                isSelectChar01Screen = false;
+                isSelectChar03Screen = true;
+            } else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
+                isSelectChar01Screen = false;
+                isMainScreen = true;
+            } else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
+                isSelectChar01Screen = false;
+                isNicknameScreen = true;
+                selectedCharacterImage = character01;
+            }
+        } else if (isSelectChar02Screen) {
+            if (mouseX >= 170 && mouseX <= 448 && mouseY >= 274 && mouseY <= 629) {
+                isSelectChar02Screen = false;
+                isSelectChar01Screen = true;
+            } else if (mouseX >= 832 && mouseX <= 1110 && mouseY >= 274 && mouseY <= 629) {
+                isSelectChar02Screen = false;
+                isSelectChar03Screen = true;
+            } else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
+                isSelectChar02Screen = false;
+                isMainScreen = true;
+            } else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
+                isSelectChar02Screen = false;
+                isNicknameScreen = true;
+                selectedCharacterImage = character02;
+            }
+        } else if (isSelectChar03Screen) {
+            if (mouseX >= 170 && mouseX <= 448 && mouseY >= 274 && mouseY <= 629) {
+                isSelectChar03Screen = false;
+                isSelectChar01Screen = true;
+            } else if (mouseX >= 501 && mouseX <= 779 && mouseY >= 274 && mouseY <= 629) {
+                isSelectChar03Screen = false;
+                isSelectChar02Screen = true;
+            } else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
+                isSelectChar03Screen = false;
+                isMainScreen = true;
+            } else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
+                isSelectChar03Screen = false;
+                isNicknameScreen = true;
+                selectedCharacterImage = character03;
+            }
+        } else if (isNicknameScreen) {
+            if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
+                isNicknameScreen = false;
+                isSelectCharScreen = true;
+            } else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
+                isNicknameScreen = false;
+                String nickname = nicknameField.getText();
+                gameStart(selectedCharacterImage, nickname);
+            }
+        } else if (isGame02Screen) {
+            if (mouseX >= 1200 && mouseX <= 1255 && mouseY >= 30 && mouseY <= 85) {
+                showSettingsPanel();
             }
         }
 
-        public void keyReleased(KeyEvent e) {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_UP:
-                    game.setUp(false);
-                    break;
-                case KeyEvent.VK_DOWN:
-                    game.setDown(false);
-                    break;
-                case KeyEvent.VK_LEFT:
-                    game.setLeft(false);
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    game.setRight(false);
-                    break;
-                case KeyEvent.VK_SPACE:
-                    game.setShooting(false);
-                    break;
-            }
+        if (isNicknameScreen && confirmButton.getBounds().contains(e.getPoint())) {
+            handleConfirmButtonClick();
         }
+    }
+
+    private void showSettingsPanel() {
+        JFrame settingsFrame = new JFrame("Settings");
+        settingsFrame.setSize(900, 500);
+        settingsFrame.setLayout(new BorderLayout());
+        settingsFrame.getContentPane().setBackground(Color.lightGray);
+
+        JLabel settingsLabel = new JLabel("Settings Panel", SwingConstants.CENTER);
+        settingsLabel.setForeground(Color.WHITE);
+        settingsFrame.add(settingsLabel, BorderLayout.CENTER);
+        
+        JPanel volumePanel = new JPanel();   // 소리 조절 기능 관련 
+        volumePanel.setLayout(new BoxLayout(volumePanel, BoxLayout.Y_AXIS));
+        volumePanel.setBackground(Color.lightGray);
+
+        JLabel volumeLabel = new JLabel("Volume Control", SwingConstants.CENTER);
+        volumeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        volumePanel.add(volumeLabel);
+
+        JSlider volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, (int) (currentVolume * 100));  // 소리 조절 가능 슬라이더 만들기..
+        volumeSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        volumeSlider.setMajorTickSpacing(10);
+        volumeSlider.setPaintTicks(true);
+        volumePanel.add(volumeSlider);
+
+        volumeSlider.addChangeListener(e -> {
+            float volume = volumeSlider.getValue() / 100.0f; 
+            adjustVolume(volume); 
+        });
+       
+
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(Color.black);
+
+        JButton returnButton = new JButton("Return to Main Screen");
+        returnButton.setFont(new Font("Arial", Font.PLAIN, 25));
+        returnButton.setBackground(Color.WHITE);
+        returnButton.setFocusPainted(false);
+
+        returnButton.addActionListener(e -> {
+            returnToMainScreen();
+            isPaused = false;
+            settingsFrame.dispose();
+        });
+
+        buttonPanel.add(returnButton);
+
+        settingsFrame.add(settingsLabel, BorderLayout.CENTER);
+        settingsFrame.add(volumePanel, BorderLayout.CENTER);
+        settingsFrame.add(buttonPanel, BorderLayout.WEST);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //setting 화면 사이즈 관련 
+        int x = (screenSize.width - settingsFrame.getWidth()) / 2;
+        int y = (screenSize.height - settingsFrame.getHeight()) / 2;
+        settingsFrame.setLocation(x, y);
+        
+        
+
+        settingsFrame.setVisible(true);
+        isPaused = true;
     }
     
-    // 메인 화면에서 start 버튼 클릭 시, 캐릭터 선택 창으로 이동. how to play 버튼 클릭 시, 안내창으로 이동. 
-    class MouseListener extends MouseAdapter {
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            int mouseX = e.getX();
-            int mouseY = e.getY();
-
-            if (isMainScreen) {
-                if (mouseX >= 827 && mouseX <= 1160 && mouseY >= 329 && mouseY <= 443) {
-                    selectChar();
-                } else if (mouseX >= 827 && mouseX <= 1160 && mouseY >= 494 && mouseY <= 608) {
-                    showHowtoPlayScreen();
-                }else if (isNicknameScreen) {
-                    // 닉네임 입력 화면에서 다음 버튼을 클릭했을 때
-                    if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
-                        String nickname = nicknameField.getText(); // 입력된 닉네임 가져오기
-                        isNicknameScreen = false;
-                        isGameStartAlertScreen = true;
-                        gameStart(selectedCharacterImage, nickname); // 닉네임과 캐릭터 이미지 전달하여 게임 시작
-                    }
-                }
-            } else if (isHowtoPlayScreen) {
-                if (mouseX >= 62 && mouseX <= 97 && mouseY >= 64 && mouseY <= 99) {
-                    isHowtoPlayScreen = false;
-                    isMainScreen = true;
-                } else if (mouseX >= 519 && mouseX <= 762 && mouseY >= 569 && mouseY <= 648) {
-                    isHowtoPlayScreen = false;
-                    isSelectCharScreen = true;
-                }
-            } else if (isSelectCharScreen) {
-                if (mouseX >= 170 && mouseX <= 448 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectCharScreen = false;
-                    isSelectChar01Screen = true;
-                } else if (mouseX >= 501 && mouseX <= 779 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectCharScreen = false;
-                    isSelectChar02Screen = true;
-                    
-                } else if (mouseX >= 832 && mouseX <= 1110 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectCharScreen = false;
-                    isSelectChar03Screen = true;
-                    
-                }
-                // 뒤로 가기 (메인 화면) 구현. 
-                else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectCharScreen = false;
-                    isMainScreen = true;
-                }
-                // 다음 스크린으로 가기 구현.
-                else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectCharScreen = false;
-                    isNicknameScreen = true;
-                }
-            } else if (isSelectChar01Screen) {
-                if (mouseX >= 501 && mouseX <= 779 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectChar01Screen = false;
-                    isSelectChar02Screen = true;
-                } else if (mouseX >= 832 && mouseX <= 1110 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectChar01Screen = false;
-                    isSelectChar03Screen = true;
-                }
-                // 뒤로 가기 구현. 
-                else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectChar01Screen = false;
-                    isMainScreen = true;
-                }
-                // 다음 스크린으로 가기 구현.
-                else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectChar01Screen = false;
-                    isNicknameScreen = true;
-                    
-                    selectedCharacterImage = character01;
-                }
-            } else if (isSelectChar02Screen) {
-                if (mouseX >= 170 && mouseX <= 448 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectChar02Screen = false;
-                    isSelectChar01Screen = true;
-                } else if (mouseX >= 832 && mouseX <= 1110 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectChar02Screen = false;
-                    isSelectChar03Screen = true;
-                }
-                // 뒤로 가기 구현. 
-                else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectChar02Screen = false;
-                    isMainScreen = true;
-                }
-                // 다음 스크린으로 가기 구현.
-                else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectChar02Screen = false;
-                    isNicknameScreen = true;
-                    
-                    selectedCharacterImage = character02;
-                }
-            } else if (isSelectChar03Screen) {
-                if (mouseX >= 170 && mouseX <= 448 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectChar03Screen = false;
-                    isSelectChar01Screen = true;
-                } else if (mouseX >= 501 && mouseX <= 779 && mouseY >= 274 && mouseY <= 629) {
-                    isSelectChar03Screen = false;
-                    isSelectChar02Screen = true;
-                }
-                // 뒤로 가기 구현. 
-                else if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectChar03Screen = false;
-                    isMainScreen = true;
-                }
-                // 다음 스크린으로 가기 구현.
-                else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
-                    isSelectChar03Screen = false;
-                    isNicknameScreen = true;
-                    
-                    selectedCharacterImage = character03;
-                }
-            } else if (isNicknameScreen) {
-            	if (mouseX >= 73 && mouseX <= 108 && mouseY >= 424 && mouseY <= 494) {
-                    isNicknameScreen = false;
-                    isSelectCharScreen = true;
-                }
-                // 다음 스크린으로 가기 구현.
-                else if (mouseX >= 1171 && mouseX <= 1206 && mouseY >= 424 && mouseY <= 494) {
-                	 isNicknameScreen = false;
-                	 String nickname = nicknameField.getText();
-                	 gameStart(selectedCharacterImage, nickname);
-                }
-            } 
-            else if (isGame02Screen) {
-                // 설정 아이콘 클릭 시 설정 패널을 표시
-                if (mouseX >= 1200 && mouseX <= 1255 && mouseY >= 30 && mouseY <= 85) {
-                    showSettingsPanel();
-                }
-            }
-            
-            if (isNicknameScreen && confirmButton.getBounds().contains(e.getPoint())) {
-                handleConfirmButtonClick();
-            }
-               
-        
-        }
-        
-        private void showSettingsPanel() {
-        	
-        	
-        	
-            JFrame settingsFrame = new JFrame("Settings");
-            settingsFrame.setSize(900, 500);
-            //settingsFrame.setUndecorated(true);
-            settingsFrame.setLayout(new BorderLayout());
-            settingsFrame.getContentPane().setBackground(Color.lightGray); // 패널의 배경색을 검은색으로 설정
-
-            JLabel settingsLabel = new JLabel("Settings Panel", SwingConstants.CENTER);
-            settingsLabel.setForeground(Color.WHITE); // 글자 색을 흰색으로 설정하여 검은 배경에서 잘 보이도록 함
-            settingsFrame.add(settingsLabel, BorderLayout.CENTER);
-            
-            JPanel buttonPanel = new JPanel();
-            buttonPanel.setBackground(Color.black);
-            
-            JButton returnButton = new JButton("Return to Main Screen");
-            returnButton.setFont(new Font("Arial", Font.PLAIN, 18));
-            returnButton.setBackground(Color.WHITE);
-            returnButton.setFocusPainted(false);
-
-            returnButton.addActionListener(e -> {
-                returnToMainScreen();
-                settingsFrame.dispose();  // 설정 창 닫기
-            });
-
-            buttonPanel.add(returnButton);
-            
-            settingsFrame.add(settingsLabel, BorderLayout.CENTER);
-            settingsFrame.add(buttonPanel, BorderLayout.SOUTH);
-
-            // 화면의 가운데에 오도록 설정
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            int x = (screenSize.width - settingsFrame.getWidth()) / 2;
-            int y = (screenSize.height - settingsFrame.getHeight()) / 2;
-            settingsFrame.setLocation(x, y);
-            
-            settingsFrame.setVisible(true);
-        }
-
-    }
     
     
     
     public static void main(String[] args) {
-        new ShootingGame();
-    }
+    	 SwingUtilities.invokeLater(() -> {
+             new ShootingGame();
+         });    }
 }

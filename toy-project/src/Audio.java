@@ -19,9 +19,9 @@ public class Audio {
     }
 
     public void start() {
-        clip.setFramePosition(0);
-        clip.start();
-        if (isLoop) clip.loop(Clip.LOOP_CONTINUOUSLY);
+    	 clip.setFramePosition(0);
+         clip.start();
+         if (isLoop) clip.loop(Clip.LOOP_CONTINUOUSLY);
     }
 
     public void stop() {
@@ -29,5 +29,17 @@ public class Audio {
              clip.stop();
              clip.setFramePosition(0); 
          }
+    }
+    public void setVolume(float volume) {
+        if (clip != null) {
+            try {
+                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                // volume ranges from 0.0 to 1.0
+                float dB = (float) (Math.log(volume) / Math.log(10.0) * 20.0);
+                gainControl.setValue(dB);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

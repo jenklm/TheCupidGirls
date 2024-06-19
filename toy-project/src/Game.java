@@ -192,7 +192,7 @@ public class Game extends Thread {
                     if (hitSound != null) {
                         hitSound.start();
                     } else {
-                        System.err.println("hitSound is not initialized.");
+                        System.err.println("hitSound is not initialized."); 
                     }
 
                     score += 1000; // 점수 즉시 증가.
